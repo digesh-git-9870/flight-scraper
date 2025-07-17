@@ -1,15 +1,11 @@
 {
   "name": "flight-scraper",
   "version": "1.0.0",
-  "description": "FlightStats.com web scraper using Puppeteer",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "puppeteer": {
-    "skipChromiumDownload": true
-  },
   "dependencies": {
-    "puppeteer": "^22.8.2"
+    "puppeteer": "^21.11.0"
   }
 }
