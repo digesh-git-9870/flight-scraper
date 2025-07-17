@@ -1,40 +1,25 @@
-const express = require('express');
 const puppeteer = require('puppeteer');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+(async () => {
+  console.log("📡 Launching browser...");
 
-app.get('/scrape', async (req, res) => {
-  const flight = req.query.flight || "LX155";
-  const date = req.query.date || "2025-07-16";
+  const browser = await puppeteer.launch({
+    headless: "new",
+    executablePath: "/usr/bin/chromium-browser", // Or try "/usr/bin/chromium"
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
 
-  const url = `https://www.flightstats.com/v2/flight-tracker/${flight.slice(0, 2)}/${flight.slice(2)}?year=${date.slice(0, 4)}&month=${Number(date.slice(5, 7))}&date=${Number(date.slice(8))}`;
-  console.log("🌐 Scraping URL:", url);
+  const page = await browser.newPage();
 
-  try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox']
-    });
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
+  const flightUrl = 'https://www.flightstats.com/v2/flight-tracker/LX/155?year=2025&month=7&date=16';
+  console.log(`🌐 Navigating to: ${flightUrl}`);
+  await page.goto(flightUrl, { waitUntil: 'networkidle2' });
 
-    // This is just a placeholder until we refine the selectors.
-    const title = await page.title();
+  const title = await page.title();
+  console.log("📄 Page Title:", title);
 
-    await browser.close();
+  // You can add more scraping logic here (DOM parsing etc.)
 
-    res.json({
-      message: `Scraped flight ${flight} for ${date}`,
-      pageTitle: title
-    });
-
-  } catch (e) {
-    console.error("❌ Error scraping:", e.message);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  await browser.close();
+  console.log("✅ Done.");
+})();
