@@ -2,26 +2,26 @@ import puppeteer from 'puppeteer-core';
 import { execSync } from 'child_process';
 
 (async () => {
-  console.log("📡 Launching Puppeteer...");
+  try {
+    const chromiumPath = execSync('which chromium || which chromium-browser || which google-chrome').toString().trim();
+    console.log("📍 Chromium path:", chromiumPath);
 
-  // Try to find Chromium installed on system
-  const chromiumPath = execSync('which chromium || which chromium-browser || which google-chrome')
-    .toString().trim();
+    const browser = await puppeteer.launch({
+      executablePath: chromiumPath,
+      headless: "new",
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
-  console.log("🧭 Chromium path:", chromiumPath);
+    const page = await browser.newPage();
+    const url = "https://www.flightstats.com/v2/flight-tracker/LX/155?year=2025&month=7&date=16";
+    console.log(`🌐 Navigating to ${url}`);
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
-  const browser = await puppeteer.launch({
-    executablePath: chromiumPath,
-    headless: "new"
-  });
+    const title = await page.title();
+    console.log("✅ Page Title:", title);
 
-  const page = await browser.newPage();
-  const url = "https://www.flightstats.com/v2/flight-tracker/LX/155?year=2025&month=7&date=16";
-  console.log(`🌐 Navigating to ${url}`);
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-
-  const title = await page.title();
-  console.log("📄 Page title:", title);
-
-  await browser.close();
+    await browser.close();
+  } catch (err) {
+    console.error("❌ Scraper error:", err.message);
+  }
 })();
